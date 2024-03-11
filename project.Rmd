@@ -8,3 +8,58 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
+
+```{r}
+library(readxl)
+library(ggplot2)
+library(tidyverse)
+```
+
+```{r}
+ds_courses <- read_excel("ds_courses.xlsx"); ds_courses
+```
+
+```{r}
+# filter for undergrad
+ds_courses <- filter(ds_courses, `Catalog Number` < 5000); ds_courses 
+```
+
+```{r}
+# select relevant columns for all questions
+ds_courses <- select(ds_courses, `Catalog Number`, `Class Title`, `Primary Instructor Name`, 
+                     `Course GPA`, `# of Students`, `A+`, A); ds_courses
+```
+
+
+```{r}
+# Q1
+ggplot(ds_courses, aes(x=`Course GPA`, y=`Primary Instructor Name`)) + 
+  geom_boxplot() + stat_summary(fun=mean, geom="point", shape=20, size=2, color="red") + 
+  labs(title="Professor vs Associated Course GPA", 
+       caption="A comparison of DS Professors and their associated course gpa in the past 3 years.
+       The red dots mark the average associated gpa for that professor.")
+
+
+ds_courses %>% select(`Primary Instructor Name`, `Course GPA`) %>% group_by(`Primary Instructor Name`) %>%
+  summarize(avg_gpa = mean(`Course GPA`)) %>% arrange(desc(avg_gpa))
+```
+
+```{r}
+# Q2
+grpd_courses <- ds_courses %>% select(`Class Title`, `# of Students`, `A+`, A) %>% 
+  group_by(`Class Title`) %>% summarize(
+    avg_stud = mean(`# of Students`), 
+    `avg_A+` = mean(`A+`),
+    avg_A = mean(A)); grpd_courses
+
+prob_A <- (grpd_courses$avg_A + grpd_courses$`avg_A+`) / grpd_courses$avg_stud; prob_A
+
+ggplot(grpd_courses, aes(x=prob_A, y=`Class Title`)) + geom_col() + xlim(0, 1) +
+  labs(title="DS Course vs Respective Probability of A/A+",
+      x="Probability of A or A+",
+      caption="A chart demonstrating the association between a particular undergraduate DS course
+      and the probability of a student obtaining an A or A+ in it.")
+
+grpd_courses %>% mutate(prob_A) %>% arrange(desc(prob_A))
+
+```
