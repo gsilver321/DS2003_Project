@@ -67,12 +67,16 @@ grpd_courses <- grpd_courses %>% mutate(prob_A) %>% arrange(desc(prob_A)); grpd_
 
 classes <- fct_rev(factor(grpd_courses$`Class Title`, levels=grpd_courses$`Class Title`))
 
-ggplot(grpd_courses, aes(x=prob_A, y=classes)) + geom_col() + xlim(0, 1) +
+Category <- c("Domain Elective or Final Project", "Analytics", "N/A", "Foundational Programming", "Systems", "Data Design or Value", "N/A", "Analytics", "Data Design or Value")
+
+ggplot(grpd_courses %>% mutate(Category), aes(x=prob_A, y=classes, fill=Category)) + geom_col() + xlim(0, 1) +
+  theme_gray(base_size = 10) + geom_text(aes(label=format(round(prob_A, 2), nsmall = 2)), hjust=1.2) +
   labs(title="DS Course vs Respective Probability of A/A+",
       x="Probability of A or A+",
       y="Class Title",
       caption="A chart demonstrating the association between a particular undergraduate DS course
       and the probability of a student obtaining an A or A+ in it.")
-
+  
+  
 
 ```
