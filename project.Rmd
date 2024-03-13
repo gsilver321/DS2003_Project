@@ -33,15 +33,24 @@ ds_courses <- select(ds_courses, `Catalog Number`, `Class Title`, `Primary Instr
 
 ```{r}
 # Q1
-ggplot(ds_courses, aes(x=`Course GPA`, y=`Primary Instructor Name`)) + 
+prof_gpas <- ds_courses %>% select(`Primary Instructor Name`, `Course GPA`) %>%     
+  group_by(`Primary Instructor Name`) %>%
+  summarize(avg_gpa = mean(`Course GPA`)) %>% arrange(desc(avg_gpa)); prof_gpas
+
+prof_order <- fct_rev(factor(prof_gpas$`Primary Instructor Name`, 
+                             levels=prof_gpas$`Primary Instructor Name`)); prof_order
+
+prof_order_plot <- factor(ds_courses$`Primary Instructor Name`, levels=prof_order)
+
+ggplot(ds_courses, aes(x=`Course GPA`, y=fct_rev(prof_order_plot))) + 
   geom_boxplot() + stat_summary(fun=mean, geom="point", shape=20, size=2, color="red") + 
-  labs(title="Professor vs Associated Course GPA", 
+  labs(title="Professor vs Associated Course GPA",
+       y="Primary Instructor Name",
        caption="A comparison of DS Professors and their associated course gpa in the past 3 years.
        The red dots mark the average associated gpa for that professor.")
 
 
-ds_courses %>% select(`Primary Instructor Name`, `Course GPA`) %>% group_by(`Primary Instructor Name`) %>%
-  summarize(avg_gpa = mean(`Course GPA`)) %>% arrange(desc(avg_gpa))
+
 ```
 
 ```{r}
@@ -54,13 +63,21 @@ grpd_courses <- ds_courses %>% select(`Class Title`, `# of Students`, `A+`, A) %
 
 prob_A <- (grpd_courses$avg_A + grpd_courses$`avg_A+`) / grpd_courses$avg_stud; prob_A
 
-ggplot(grpd_courses, aes(x=prob_A, y=`Class Title`)) + geom_col() + xlim(0, 1) +
+grpd_courses <- grpd_courses %>% mutate(prob_A) %>% arrange(desc(prob_A)); grpd_courses
+
+classes <- fct_rev(factor(grpd_courses$`Class Title`, levels=grpd_courses$`Class Title`))
+
+Category <- c("Domain Elective or Final Project", "Analytics", "N/A", "Foundational Programming", "Systems", "Data Design or Value", "N/A", "Analytics", "Data Design or Value")
+
+ggplot(grpd_courses %>% mutate(Category), aes(x=prob_A, y=classes, fill=Category)) + geom_col() + xlim(0, 1) +
+  theme_gray(base_size = 10) + geom_text(aes(label=format(round(prob_A, 2), nsmall = 2)), hjust=1.2) +
   labs(title="DS Course vs Respective Probability of A/A+",
       x="Probability of A or A+",
+      y="Class Title",
       caption="A chart demonstrating the association between a particular undergraduate DS course
       and the probability of a student obtaining an A or A+ in it.")
-
-grpd_courses %>% mutate(prob_A) %>% arrange(desc(prob_A))
+  
+  
 
 ```
 
