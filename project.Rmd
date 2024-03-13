@@ -63,3 +63,33 @@ ggplot(grpd_courses, aes(x=prob_A, y=`Class Title`)) + geom_col() + xlim(0, 1) +
 grpd_courses %>% mutate(prob_A) %>% arrange(desc(prob_A))
 
 ```
+
+```{r}
+#3.1
+gpa_vs_size <- ds_courses %>%
+  group_by(`Primary Instructor Name`) %>%
+  summarize(avg_gpa = mean(`Course GPA`),
+            avg_size = mean(`# of Students`))
+
+# Plotting
+ggplot(gpa_vs_size, aes(x=avg_gpa, y=avg_size)) +
+  geom_point(size = 3,aes(color=`Primary Instructor Name`)) +
+  labs(x = "Average Class GPA", y = "Average Class Size", title = "Relationship between Average Class GPA and Average Class Size by Instructor", caption="A plot demonstrating the correlation between the average size and average GPA of a course, across different instructors.") +
+  theme_minimal() 
+```
+```{r}
+#3.2
+gpa_vs_size_2 <- ds_courses %>%
+  filter(`# of Students` > 10) %>%
+  group_by(`Primary Instructor Name`) %>%
+  summarize(avg_gpa = mean(`Course GPA`),
+            avg_size = mean(`# of Students`))
+
+# Plotting
+ggplot(gpa_vs_size_2, aes(x=avg_gpa, y=avg_size)) +
+  geom_point(size = 3,aes(color=`Primary Instructor Name`)) +
+  labs(x = "Average Class GPA", y = "Average Class Size", title = "Relationship between Average Class GPA and Average Class Size by Instructor", caption="A plot demonstrating the correlation between the average size and average GPA of a course, across different instructors, 
+       where class size > 10.") +
+  theme_minimal() 
+```
+
