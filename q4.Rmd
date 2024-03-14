@@ -68,7 +68,7 @@ all_courses
 ```{r}
 # mark ds courses
 all_courses <- mutate(all_courses, `Class Type` = if_else(substr(Course,1,2)=="DS", "DS Class", "Outside Class"))
-all_courses
+all_coursess
 ```
 
 ```{r}
