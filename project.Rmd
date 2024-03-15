@@ -143,10 +143,10 @@ all_courses
 ```{r}
 # create new column for category
 all_courses <- mutate(all_courses, Category = case_when(
-  Course %in% Fundamental | Course=="DS 1002" ~ "Foundational",
+  Course %in% Fundamental | Course=="DS 1002" | Course=="DS 2001" ~ "Foundational",
   Course %in% Analytics | Course=="DS 2006" | Course=="DS 3001" | Course=="DS 3005"
   | Course=="DS 3006" ~ "Analytics",
-  Course %in% Systems | Course=="DS 2002" ~ "Systems",
+  Course %in% Systems | Course=="DS 2002" | Course=="DS 3002" ~ "Systems",
   Course %in% DesignValue | Course=="DS 2003" | Course=="DS 2004" ~ "Design/Value",
   Course %in% DomainFinal | Course=="DS 4002" ~ "Domain/Final"
 )) %>% drop_na(Category);
