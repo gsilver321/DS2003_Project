@@ -70,11 +70,11 @@ Category <- c("Domain Elective or Final Project", "Analytics", "N/A", "Foundatio
 
 ggplot(grpd_courses %>% mutate(Category), aes(x=prob_A, y=classes, fill=Category)) + geom_col() + xlim(0, 1) +
   theme_gray(base_size = 10) + geom_text(aes(label=format(round(prob_A, 2), nsmall = 2)), hjust=1.2) +
-  labs(title="DS Course vs Respective Probability of A/A+",
-      x="Probability of A or A+",
+  labs(title="DS Course vs Respective Proportions of A/A+",
+      x="Proportion of Students with A or A+",
       y="Class Title",
       caption="A chart demonstrating the association between a particular undergraduate DS course
-      and the probability of a student obtaining an A or A+ in it.")
+      and the proportion of students obtaining an A or A+ in it.")
 
 ```
 
@@ -95,7 +95,7 @@ ggplot(gpa_vs_size, aes(x=avg_gpa, y=avg_size)) +
 ```{r}
 # 3.2
 gpa_vs_size_2 <- ds_courses %>%
-  filter(`# of Students` > 10) %>%
+  filter(`# of Students` > 20) %>%
   group_by(`Primary Instructor Name`) %>%
   summarize(avg_gpa = mean(`Course GPA`),
             avg_size = mean(`# of Students`))
