@@ -1,0 +1,82 @@
+---
+title: "q4"
+output: html_document
+date: "2024-03-11"
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(readxl)
+library(ggplot2)
+library(tidyverse)
+```
+
+# q4
+```{r}
+all_courses <- read_excel("all_courses.xlsx"); all_courses
+```
+
+```{r}
+# filter for undergrad
+all_courses <- filter(all_courses, `Catalog Number` < 5000); all_courses 
+```
+
+```{r}
+# select relevant columns for q4 and combine subject and catalog num
+all_courses <- select(all_courses, `Subject`, `Catalog Number`, `Course GPA`); 
+all_courses <- unite(all_courses, Course, Subject,`Catalog Number`, sep=" ", remove=FALSE)
+all_courses
+```
+
+```{r}
+Fundamental = c("CS 1110", "CS 1111", "CS 1112", "CS 2110", "PHYS 1655", "CS 1113")
+Analytics = c("CS 4774", "PSYC 5710", "STAT 5630")
+Systems = c("CS 4750", "COMM 3220", "SYS 2202")
+DesignValue = c("SARC 5400", "APMA 2500", "COMM 3810", "COMM 4520", "LPPP 4210", 
+                "NASC 4200", "NUIP 3311", "LPPS 5360", "STS 4600", "NUIP 4311")
+DomainFinal = c("BME 3636", "CHE 4561", "COMM 4351", "COMM 4230", "COMM 4520", "COMM 4522",
+                "CS 3710", "CS 4501", "ENGL 3500", "EVSC 3020", "EVSC 4080", "EVSC 5040",
+                "GSVS 4100", "PHS 3102", "STAT 4220", "STAT 4630", "STAT 4800", "STAT 4996")
+```
+
+```{r}
+# filter out irrelevant courses
+all_courses <- filter(all_courses, substr(Course,1,2)=="DS" | match(Course, Fundamental)
+                      | match(Course, Analytics) | match(Course, Systems)
+                      | match(Course, DesignValue) | match(Course, DomainFinal))
+all_courses
+```
+
+```{r}
+# create new column for category
+all_courses <- mutate(all_courses, Category = case_when(
+  Course %in% Fundamental | Course=="DS 1002" ~ "Fundamental",
+  Course %in% Analytics | Course=="DS 2006" | Course=="DS 3001" | Course=="DS 3005"
+  | Course=="DS 3006" ~ "Analytics",
+  Course %in% Systems | Course=="DS 2002" ~ "Systems",
+  Course %in% DesignValue | Course=="DS 2003" | Course=="DS 2004" ~ "Design/Value",
+  Course %in% DomainFinal | Course=="DS 4002" ~ "Domain/Final"
+)) %>% drop_na(Category);
+all_courses
+```
+
+```{r}
+# mark ds courses
+all_courses <- mutate(all_courses, `Class Type` = if_else(substr(Course,1,2)=="DS", "DS Class", "Outside Class"))
+all_coursess
+```
+
+```{r}
+ggplot(all_courses, aes(fill=`Class Type`, y=`Course GPA`, x=Category)) + 
+  geom_boxplot() + ggtitle("Course GPA Difference Between DS and non-DS Courses \nGrouped By Requirement Categories")
+```
+
+```{r}
+ggplot(all_courses, aes(fill=`Class Type`, y=`Course GPA`, x=Subject)) + 
+  geom_boxplot() + ggtitle("Course GPA Difference Between DS and non-DS Courses \nGrouped By Course Subjects")
+```
