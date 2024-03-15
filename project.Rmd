@@ -78,27 +78,10 @@ ggplot(grpd_courses %>% mutate(Category), aes(x=prob_A, y=classes, fill=Category
 
 ```
 
+
 ```{r}
 # Q3
-
-class_gpas <- ds_courses %>% select(`Primary Instructor Name`, `# of Students`, `Course GPA`) %>% 
-  group_by(`Primary Instructor Name`) %>% summarize(
-    avg_stud = mean(`# of Students`), 
-    `avg_gpa` = mean(`Course GPA`)); class_gpas
-
-ggplot(class_gpas, aes(x=avg_gpa, y=avg_stud, color=`Primary Instructor Name`)) + geom_point() +
-  labs(title="Average Course GPA vs Class Size by Instructor",
-      x="Average Course GPA",
-      y="Average Class Size",
-      caption="A figure illustrating the correlation between a professor's associated gpa
-      and the size of the classes they teach.") +
-  theme(legend.key.size = unit(0.5, "cm"))
-  
-
-```
-
-```{r}
-#3.1
+# 3.1
 gpa_vs_size <- ds_courses %>%
   group_by(`Primary Instructor Name`) %>%
   summarize(avg_gpa = mean(`Course GPA`),
@@ -107,11 +90,10 @@ gpa_vs_size <- ds_courses %>%
 # Plotting
 ggplot(gpa_vs_size, aes(x=avg_gpa, y=avg_size)) +
   geom_point(size = 3,aes(color=`Primary Instructor Name`)) +
-  labs(x = "Average Class GPA", y = "Average Class Size", title = "Relationship between Average Class GPA and Average Class Size by Instructor", caption="A plot demonstrating the correlation between the average size and average GPA of a course, across different instructors.") +
-  theme_minimal() 
+  labs(x = "Average Class GPA", y = "Average Class Size", title = "Relationship between Average Class GPA and Average Class Size by Instructor", caption="A plot demonstrating the correlation between the average size and average GPA of a course, across different instructors.")
 ```
 ```{r}
-#3.2
+# 3.2
 gpa_vs_size_2 <- ds_courses %>%
   filter(`# of Students` > 10) %>%
   group_by(`Primary Instructor Name`) %>%
@@ -122,7 +104,66 @@ gpa_vs_size_2 <- ds_courses %>%
 ggplot(gpa_vs_size_2, aes(x=avg_gpa, y=avg_size)) +
   geom_point(size = 3,aes(color=`Primary Instructor Name`)) +
   labs(x = "Average Class GPA", y = "Average Class Size", title = "Relationship between Average Class GPA and Average Class Size by Instructor", caption="A plot demonstrating the correlation between the average size and average GPA of a course, across different instructors, 
-       where class size > 10.") +
-  theme_minimal() 
+       where class size > 20.")
 ```
 
+
+```{r}
+# Q4
+all_courses <- read_excel("all_courses.xlsx"); all_courses
+```
+
+```{r}
+# select relevant columns for q4 and combine subject and catalog num
+all_courses <- select(all_courses, `Subject`, `Catalog Number`, `Course GPA`); 
+all_courses <- unite(all_courses, Course, Subject,`Catalog Number`, sep=" ", remove=FALSE)
+all_courses
+```
+
+```{r}
+Fundamental = c("CS 1110", "CS 1111", "CS 1112", "CS 2110", "PHYS 1655", "CS 1113")
+Analytics = c("CS 4774", "PSYC 5710", "STAT 5630")
+Systems = c("CS 4750", "COMM 3220", "SYS 2202")
+DesignValue = c("SARC 5400", "APMA 2500", "COMM 3810", "COMM 4520", "LPPP 4210", 
+                "NASC 4200", "NUIP 3311", "LPPS 5360", "STS 4600", "NUIP 4311")
+DomainFinal = c("BME 3636", "CHE 4561", "COMM 4351", "COMM 4230", "COMM 4520", "COMM 4522",
+                "CS 3710", "CS 4501", "ENGL 3500", "EVSC 3020", "EVSC 4080", "EVSC 5040",
+                "GSVS 4100", "PHS 3102", "STAT 4220", "STAT 4630", "STAT 4800", "STAT 4996")
+```
+
+```{r}
+# filter out irrelevant courses
+all_courses <- filter(all_courses, substr(Course,1,2)=="DS" | match(Course, Fundamental)
+                      | match(Course, Analytics) | match(Course, Systems)
+                      | match(Course, DesignValue) | match(Course, DomainFinal))
+all_courses
+```
+
+```{r}
+# create new column for category
+all_courses <- mutate(all_courses, Category = case_when(
+  Course %in% Fundamental | Course=="DS 1002" ~ "Foundational",
+  Course %in% Analytics | Course=="DS 2006" | Course=="DS 3001" | Course=="DS 3005"
+  | Course=="DS 3006" ~ "Analytics",
+  Course %in% Systems | Course=="DS 2002" ~ "Systems",
+  Course %in% DesignValue | Course=="DS 2003" | Course=="DS 2004" ~ "Design/Value",
+  Course %in% DomainFinal | Course=="DS 4002" ~ "Domain/Final"
+)) %>% drop_na(Category);
+all_courses
+```
+
+```{r}
+# mark ds courses
+all_courses <- mutate(all_courses, `Class Type` = if_else(substr(Course,1,2)=="DS", "DS Class", "Non-DS Class"))
+all_courses
+```
+
+```{r}
+ggplot(all_courses, aes(fill=`Class Type`, y=`Course GPA`, x=Category)) + 
+  geom_boxplot() + labs(title="Course GPA Difference Between DS and non-DS Courses \nGrouped By Requirement Categories", caption="A box plot demonstrating the difference in grade distribution for DS and equivalent\n non-DS classes for each requirement category")
+```
+
+```{r}
+ggplot(all_courses, aes(fill=`Class Type`, x=`Course GPA`, y=fct_rev(Subject))) + 
+  geom_boxplot() + ggtitle("Course GPA Difference Between DS and non-DS Courses \nGrouped By Course Subjects") + labs(caption="A box plot demonstrating the difference in grade distribution for DS and equivalent \nnon-DS for each subject") + ylab("Subject")
+```
