@@ -49,9 +49,8 @@ ggplot(ds_courses, aes(x=`Course GPA`, y=fct_rev(prof_order_plot))) +
        caption="A comparison of DS Professors and their associated course gpa in the past 3 years.
        The red dots mark the average associated gpa for that professor.")
 
-
-
 ```
+
 
 ```{r}
 # Q2
@@ -76,7 +75,24 @@ ggplot(grpd_courses %>% mutate(Category), aes(x=prob_A, y=classes, fill=Category
       y="Class Title",
       caption="A chart demonstrating the association between a particular undergraduate DS course
       and the probability of a student obtaining an A or A+ in it.")
-  
+
+```
+
+```{r}
+# Q3
+
+class_gpas <- ds_courses %>% select(`Primary Instructor Name`, `# of Students`, `Course GPA`) %>% 
+  group_by(`Primary Instructor Name`) %>% summarize(
+    avg_stud = mean(`# of Students`), 
+    `avg_gpa` = mean(`Course GPA`)); class_gpas
+
+ggplot(class_gpas, aes(x=avg_gpa, y=avg_stud, color=`Primary Instructor Name`)) + geom_point() +
+  labs(title="Average Course GPA vs Class Size by Instructor",
+      x="Average Course GPA",
+      y="Average Class Size",
+      caption="A figure illustrating the correlation between a professor's associated gpa
+      and the size of the classes they teach.") +
+  theme(legend.key.size = unit(0.5, "cm"))
   
 
 ```
