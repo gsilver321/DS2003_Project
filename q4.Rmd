@@ -3,7 +3,7 @@ title: "q4"
 output: html_document
 date: "2024-03-11"
 editor_options: 
-  chunk_output_type: console
+  chunk_output_type: inline
 ---
 
 ```{r setup, include=FALSE}
@@ -19,11 +19,6 @@ library(tidyverse)
 # q4
 ```{r}
 all_courses <- read_excel("all_courses.xlsx"); all_courses
-```
-
-```{r}
-# filter for undergrad
-all_courses <- filter(all_courses, `Catalog Number` < 5000); all_courses 
 ```
 
 ```{r}
@@ -55,7 +50,7 @@ all_courses
 ```{r}
 # create new column for category
 all_courses <- mutate(all_courses, Category = case_when(
-  Course %in% Fundamental | Course=="DS 1002" ~ "Fundamental",
+  Course %in% Fundamental | Course=="DS 1002" ~ "Foundational",
   Course %in% Analytics | Course=="DS 2006" | Course=="DS 3001" | Course=="DS 3005"
   | Course=="DS 3006" ~ "Analytics",
   Course %in% Systems | Course=="DS 2002" ~ "Systems",
@@ -67,16 +62,16 @@ all_courses
 
 ```{r}
 # mark ds courses
-all_courses <- mutate(all_courses, `Class Type` = if_else(substr(Course,1,2)=="DS", "DS Class", "Outside Class"))
-all_coursess
+all_courses <- mutate(all_courses, `Class Type` = if_else(substr(Course,1,2)=="DS", "DS Class", "Non-DS Class"))
+all_courses
 ```
 
 ```{r}
 ggplot(all_courses, aes(fill=`Class Type`, y=`Course GPA`, x=Category)) + 
-  geom_boxplot() + ggtitle("Course GPA Difference Between DS and non-DS Courses \nGrouped By Requirement Categories")
+  geom_boxplot() + labs(title="Course GPA Difference Between DS and non-DS Courses \nGrouped By Requirement Categories", caption="A box plot demonstrating the difference in grade distribution for DS and equivalent\n non-DS classes for each requirement category")
 ```
 
 ```{r}
-ggplot(all_courses, aes(fill=`Class Type`, y=`Course GPA`, x=Subject)) + 
-  geom_boxplot() + ggtitle("Course GPA Difference Between DS and non-DS Courses \nGrouped By Course Subjects")
+ggplot(all_courses, aes(fill=`Class Type`, x=`Course GPA`, y=fct_rev(Subject))) + 
+  geom_boxplot() + ggtitle("Course GPA Difference Between DS and non-DS Courses \nGrouped By Course Subjects") + labs(caption="A box plot demonstrating the difference in grade distribution for DS and equivalent \nnon-DS for each subject") + ylab("Subject")
 ```
